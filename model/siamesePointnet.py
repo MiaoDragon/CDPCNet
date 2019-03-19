@@ -16,7 +16,7 @@ import torch.utils.data
 from torch.autograd import Variable
 import numpy as np
 import torch.nn.functional as F
-from pointnet import *
+from model.pointnet import *
 
 class SiamesePointNet(nn.Module):
     def __init__(self, feature_transform=False):
@@ -30,7 +30,7 @@ class SiamesePointNet(nn.Module):
         self.bn2 = nn.BatchNorm1d(256)
         # concatenate local features into global features
         # then use fully connected layer to obtain global features
-        self.fc1 = nn.Linear(1024, 512)
+        self.fc1 = nn.Linear(256, 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, 64)
         self.fc4 = nn.Linear(64, 2)
@@ -59,6 +59,24 @@ class SiamesePointNet(nn.Module):
         div_pos = len(x) // 2
         x = torch.abs(x[:div_pos] - x[div_pos:])
         x = self.fc4(x)  # used for classification (either similar or not)
+        return x
+    def separate(self, x):
+        # x shape: [B*2, shape]
+        batchsize = x.size()[0]
+        n_pts = x.size()[2]
+        # concatenate golbal features to local features
+        x, trans, trans_feat = self.feat(x)
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        # concatenate local features into global features
+        x = torch.max(x, 2, keepdim=True)[0]
+        x = x.view(-1, 256)
+        # then use fully connected layer to obtain global features
+        x = F.relu(self.fc_bn1(self.fc1(x)))
+        x = F.relu(self.fc_bn2(self.dropout(self.fc2(x))))
+        # below is inspired by
+        # https://becominghuman.ai/siamese-networks-algorithm-applications-and-pytorch-implementation-4ffa3304c18
+        x = self.fc3(x)
         return x
 
 if __name__ == '__main__':
