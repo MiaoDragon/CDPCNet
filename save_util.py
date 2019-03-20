@@ -25,7 +25,8 @@ def load_opt_state(opt, fname):
     opt.load_state_dict(checkpoint['optimizer'])
 
 def load_eval(fname):
-    checkpoint = torch.load(fname)
+    checkpoint = torch.load(fname, map_location='cpu')
+    print(checkpoint.items())
     return checkpoint['train_loss'], checkpoint['train_acc'], checkpoint['val_loss'], \
            checkpoint['val_acc'], checkpoint['test_loss'], checkpoint['test_acc']
 

@@ -131,7 +131,6 @@ def main(args):
             fname = args.out_path + args.model + '_%d.pth' % (epoch)
             save_state(classifier, optimizer, train_loss, train_acc, val_loss, val_acc, \
                        test_loss, test_acc, args.seed, fname)
-            torch.save(classifier.state_dict(), '%s/%s_%d.pth' % (args.out_path, args.model, epoch))
 
     total_correct = 0
     total_testset = 0
