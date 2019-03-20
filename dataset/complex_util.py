@@ -11,7 +11,6 @@ import time
 import pandas as pd
 from tqdm import tqdm
 from pyntcloud import PyntCloud
-from pyntcloud.structures.delanuay import Delaunay3D
 # globally load point clouds
 geos = ['dragon', 'happy', 'horse', 'bunny']
 geo_clouds = {}
@@ -25,22 +24,31 @@ for geo in geos:
     mean_x = cloud.points['x'].mean()
     mean_y = cloud.points['y'].mean()
     mean_z = cloud.points['z'].mean()
+    std_x = cloud.points['x'].std()
+    std_y = cloud.points['y'].std()
+    std_z = cloud.points['z'].std()
+    std = (std_x + std_y + std_z) / 3
+    ratio = 5 / std
     cloud.points['x'] = cloud.points['x'] - mean_x
     cloud.points['y'] = cloud.points['y'] - mean_y
     cloud.points['z'] = cloud.points['z'] - mean_z
-    cloud.points['x'] = cloud.points['x'] * 10
-    cloud.points['y'] = cloud.points['y'] * 10
-    cloud.points['z'] = cloud.points['z'] * 10
+    cloud.points['x'] = cloud.points['x'] * ratio
+    cloud.points['y'] = cloud.points['y'] * ratio
+    cloud.points['z'] = cloud.points['z'] * ratio
+    cloud.points['x'] = cloud.points['x'].astype('d')
+    cloud.points['y'] = cloud.points['y'].astype('d')
+    cloud.points['z'] = cloud.points['z'].astype('d')
     cloud.mesh = geo_meshs[geo]
+
     geo_clouds[geo] = cloud
-    pc = PyntCloud.from_file('complex/'+geo+'_compressed.ply')
-    geo_pcs[geo] = np.array([pc.points['x'], pc.points['y'], pc.points['z']])
-    choices = np.random.choice(len(pc.points['x']), 2800)
+    geo_pcs[geo] = np.array([cloud.points['x'], cloud.points['y'], cloud.points['z']], dtype='d')
+    choices = np.random.choice(len(cloud.points['x']), 2800)
     geo_pcs[geo] = geo_pcs[geo][..., choices]
     geo_pcs[geo][0,:] -= mean_x
     geo_pcs[geo][1,:] -= mean_y
     geo_pcs[geo][2,:] -= mean_z
-    geo_pcs[geo] = 10 * geo_pcs[geo]
+    geo_pcs[geo] = geo_pcs[geo]
+
 """
 def visualize(pcs):
     # visualize point cloud list
@@ -48,8 +56,8 @@ def visualize(pcs):
     for pc in pcs:
         pcd = open3d.PointCloud()
         pcd.points = open3d.Vector3dVector(pc.T)
-        print(pc.mean(axis=1))
-        print(pc.std(axis=1))
+        #print(pc.mean(axis=1))
+        #print(pc.std(axis=1))
         pcd_list.append(pcd)
     vis = open3d.Visualizer()
     vis.create_window()
@@ -116,31 +124,43 @@ def collision_check(P1, P2):
 def generate_one_collision(N=2800, pert_ratio=0.1):
     # ******generate collision data******
     # randomly select ball or cube, but only move a little relatively
+    #print('generating one collision...')
     while True:
+        #print('try')
         geo_type = np.random.choice(len(geos))
         rotation_axis1 = np.random.normal(size=3)
         rotation_axis1 = rotation_axis1 / np.linalg.norm(rotation_axis1)
         rad1 = np.random.uniform(low=-np.pi, high=np.pi)
         R1 = rotation_matrix(rotation_axis1, rad1)
-        scale1 = np.random.uniform(low=0.6, high=1.4)
+        scale1 = np.random.uniform(low=0.5, high=1.5)
+        move_d1 = np.random.normal(size=3)
+        move_d1 = move_d1 / np.linalg.norm(move_d1)
+        move_s1 = np.random.uniform(low=0., high=50.)
+        move1 = move_d1 * move_s1
         P1 = geo_pcs[geos[geo_type]]
-        P1 = (scale1 * P1.T @ R1).T
+        P1 = (scale1 * P1.T @ R1 + move1).T
         cloud1 = geo_clouds[geos[geo_type]]
+        # create a new cloud using previous loaded one
+        cloud1 = PyntCloud(points=cloud1.points, mesh=cloud1.mesh)
         p1 = np.array([cloud1.points['x'], cloud1.points['y'], cloud1.points['z']])
-        p1 = (scale1 * p1.T @ R1)
+        p1 = (scale1 * p1.T @ R1 + move1)
+        c1 = p1
         p1 = pd.DataFrame(p1)
         p1.columns = ['x', 'y', 'z']
         cloud1.points = p1
         cloud1.mesh = geo_meshs[geos[geo_type]]
 
         # randomly pick up several points
-        picked_points = np.random.choice(len(P1[0]), 10)
+        picked_points = np.random.choice(len(P1[0]), 200)
         picked_points = P1.T[picked_points]
         # randomly generate ratio for convex combination
         picked_ratio = np.random.uniform(low=0, high=1, size=len(picked_points))
-        picked_ratio = picked_ratio / np.linalg.norm(picked_ratio)
+        picked_ratio = picked_ratio / np.sum(picked_ratio)
+        #print(picked_ratio)
         # add Gaussian noise
-        dest_pt = picked_ratio @ picked_points + np.random.normal()
+        std = np.std(P1) / len(P1[0]) * 5
+        #print('std: %f' % (std))
+        dest_pt = picked_ratio @ picked_points + np.random.normal(scale=std)
 
 
 
@@ -149,7 +169,7 @@ def generate_one_collision(N=2800, pert_ratio=0.1):
         rotation_axis2 = rotation_axis2 / np.linalg.norm(rotation_axis2)
         rad2 = np.random.uniform(low=-np.pi, high=np.pi)
         R2 = rotation_matrix(rotation_axis2, rad2)
-        scale2 = np.random.uniform(low=0.6, high=1.4)
+        scale2 = np.random.uniform(low=0.5, high=1.5)
         P2 = geo_pcs[geos[geo_type]]
         # randomly pick up one point to go to the dest pt
         picked_point = np.random.choice(len(P2[0]))
@@ -157,26 +177,30 @@ def generate_one_collision(N=2800, pert_ratio=0.1):
         P2 = (scale2 * P2.T @ R2).T
         picked_point = P2.T[picked_point]
         move2 = dest_pt - picked_point
-        P2 += move2
+        P2 = (P2.T + move2).T
 
+        # create a new cloud using previous loaded one
         cloud2 = geo_clouds[geos[geo_type]]
+        cloud2 = PyntCloud(points=cloud2.points, mesh=cloud2.mesh)
         p2 = np.array([cloud2.points['x'], cloud2.points['y'], cloud2.points['z']])
         p2 = (scale2 * p2.T @ R2 + move2)
+
         p2 = pd.DataFrame(p2)
         p2.columns = ['x', 'y', 'z']
         cloud2.points = p2
         cloud2.mesh = geo_meshs[geos[geo_type]]
-
+        #visualize([P1,P2])
         if collision_check(cloud1, cloud2):
             return P1, P2
 
 def generate_collision(batch=1000, N=2800, pert_ratio=0.1):
-    print('collision:')
+    #print('collision:')
     collision_data_P1 = []
     collision_data_P2 = []
     for i in tqdm(range(batch)):
         #print('collision: %d' % (i))
         P1, P2 = generate_one_collision(N, pert_ratio)
+
         collision_data_P1.append(P1)
         collision_data_P2.append(P2)
     collision_data_P1 = np.array(collision_data_P1)
@@ -186,7 +210,9 @@ def generate_collision(batch=1000, N=2800, pert_ratio=0.1):
 def generate_one_no_collision(N=2800):
     # ******generate collision data******
     # randomly select ball or cube, but only move a little relatively
+    #print('no collision')
     while True:
+        #print('try:')
         geo_type = np.random.choice(len(geos))
         rotation_axis1 = np.random.normal(size=3)
         rotation_axis1 = rotation_axis1 / np.linalg.norm(rotation_axis1)
@@ -195,11 +221,13 @@ def generate_one_no_collision(N=2800):
         scale1 = np.random.uniform(low=0.5, high=1.5)
         move_d1 = np.random.normal(size=3)
         move_d1 = move_d1 / np.linalg.norm(move_d1)
-        move_s1 = np.random.uniform(low=0., high=10.)
+        move_s1 = np.random.uniform(low=0., high=50.)
         move1 = move_d1 * move_s1
         P1 = geo_pcs[geos[geo_type]]
         P1 = (scale1 * P1.T @ R1 + move1).T
         cloud1 = geo_clouds[geos[geo_type]]
+        cloud1 = PyntCloud(points=cloud1.points, mesh=cloud1.mesh)
+
         p1 = np.array([cloud1.points['x'], cloud1.points['y'], cloud1.points['z']])
         p1 = (scale1 * p1.T @ R1 + move1)
         p1 = pd.DataFrame(p1)
@@ -215,18 +243,19 @@ def generate_one_no_collision(N=2800):
         scale2 = np.random.uniform(low=0.5, high=1.5)
         move_d2 = np.random.normal(size=3)
         move_d2 = move_d2 / np.linalg.norm(move_d2)
-        move_s2 = np.random.uniform(low=0., high=10.)
+        move_s2 = np.random.uniform(low=0., high=50.)
         move2 = move_d2 * move_s2
         P2 = geo_pcs[geos[geo_type]]
         P2 = (scale2 * P2.T @ R2 + move2).T
         cloud2 = geo_clouds[geos[geo_type]]
+        cloud2 = PyntCloud(points=cloud2.points, mesh=cloud2.mesh)
         p2 = np.array([cloud2.points['x'], cloud2.points['y'], cloud2.points['z']])
         p2 = (scale2 * p2.T @ R2 + move2)
         p2 = pd.DataFrame(p2)
         p2.columns = ['x', 'y', 'z']
         cloud2.points = p2
         cloud2.mesh = geo_meshs[geos[geo_type]]
-
+        #visualize([P1,P2])
         if not collision_check(cloud1, cloud2):
             return P1, P2
 
