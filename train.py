@@ -2,7 +2,7 @@
 part of this training pipeline is inspired by:
      https://github.com/fxia22/pointnet.pytorch
 """
-from model.siamesePointnet import SiamesePointNet
+from model.simple_siamesePointnet import SiamesePointNet
 from dataset.geometry_loader import create_split_loaders
 from save_util import *
 import argparse
@@ -121,8 +121,8 @@ def main(args):
             correct = pred_choice.eq(target.data).cpu().sum()
             test_loss_i += loss.item()
             test_correct += correct.item()
-        test_loss_i = test_loss_i * args.batch_size / len(testloader)
-        test_acc_i = test_correct / len(testloader)
+        test_loss_i = test_loss_i  / len(testloader)
+        test_acc_i = test_correct / len(testloader) / args.batch_size
         print('[epoch %d] %s loss: %f accuracy: %f' % (epoch, blue('test'), loss, test_acc_i))
         sys.stdout.flush()
         test_loss.append(test_loss_i)

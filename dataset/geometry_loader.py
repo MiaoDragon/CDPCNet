@@ -52,9 +52,9 @@ def create_split_loaders(path, total_size, mini_size, batch_size, seed,
     # Separate a test split from the training dataset
     test_split = int(np.floor(p_test * len(train_ind)))
     train_ind, test_ind = train_ind[test_split :], train_ind[: test_split]
-    print(train_ind)
-    print(val_ind)
-    print(test_ind)
+    #print(train_ind)
+    #print(val_ind)
+    #print(test_ind)
     dataset = ConcatDataset(dataset_list)
     # Use the SubsetRandomSampler as the iterator for each subset
     sample_train = train_sampler(train_ind)
