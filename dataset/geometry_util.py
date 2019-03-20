@@ -229,7 +229,7 @@ def generate_collision(batch=1000, N=2800, pert_ratio=0.1):
     collision_data_P1 = []
     collision_data_P2 = []
     for i in range(batch):
-        print('collision: %d' % (i))
+        #print('collision: %d' % (i))
         P1, P2 = generate_one_collision(N, pert_ratio)
         collision_data_P1.append(P1)
         collision_data_P2.append(P2)
@@ -282,7 +282,7 @@ def generate_no_collision(batch=1000, N=2800):
     no_collision_data_P1 = []
     no_collision_data_P2 = []
     for i in range(batch):
-        print('no collision: %d' % (i))
+        #print('no collision: %d' % (i))
         P1, P2 = generate_one_no_collision(N)
         no_collision_data_P1.append(P1)
         no_collision_data_P2.append(P2)
