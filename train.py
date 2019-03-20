@@ -64,7 +64,7 @@ def main(args):
     if os.path.exists(start_model):
         train_loss, train_acc, val_loss, val_acc, test_loss, test_acc = load_eval(start_model)
 
-    for epoch in range(args.num_epoch):
+    for epoch in range(1, args.num_epoch+1):
         scheduler.step()
         for i, data in enumerate(trainloader, 1):
             P1, P2, target = data
