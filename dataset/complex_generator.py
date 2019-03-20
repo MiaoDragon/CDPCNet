@@ -18,7 +18,7 @@ def main(args):
         return
     minibatch = args.minibatch
     for minibatch_i in tqdm(range(args.data_size // 2 // minibatch)):
-        cP1, cP2 = generate_collision(minibatch, args.num_point, pert_ratio=0.1)
+        cP1, cP2 = generate_collision(minibatch, args.num_point, pert_ratio=0.05)
         P1, P2 = generate_no_collision(minibatch, args.num_point)
         np.save(args.save_path+'cP1_%d' % (minibatch_i), cP1)
         np.save(args.save_path+'cP2_%d' % (minibatch_i), cP2)
