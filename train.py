@@ -146,9 +146,8 @@ def main(args):
         pred_choice = pred.data.max(1)[1]
         correct = pred_choice.eq(target.data).cpu().sum()
         total_correct += correct.item()
-        total_testset += points.size()[0]
-
-    print("final accuracy {}".format(total_correct / float(total_testset)))
+        total_acc = total_correct / len(testloader) / args.batch_size
+    print("final accuracy {}".format(total_acc))
     sys.stdout.flush()
 
 parser = argparse.ArgumentParser()
