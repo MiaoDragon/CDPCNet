@@ -170,8 +170,6 @@ def generate_collision(batch=1000, N=2800, pert_ratio=0.1):
     for i in tqdm(range(batch)):
         #print('collision: %d' % (i))
         P1, P2 = generate_one_collision(N, pert_ratio)
-        P1 = np.array([P1.points['x'], P1.points['y'], P1.points['z']])
-        P2 = np.array([P2.points['x'], P2.points['y'], P2.points['z']])
         collision_data_P1.append(P1)
         collision_data_P2.append(P2)
     collision_data_P1 = np.array(collision_data_P1)
@@ -232,8 +230,6 @@ def generate_no_collision(batch=1000, N=2800):
     for i in tqdm(range(batch)):
         #print('no collision: %d' % (i))
         P1, P2 = generate_one_no_collision(N)
-        no_collision_data_P1.append(P1)
-        no_collision_data_P2.append(P2)
     no_collision_data_P1 = np.array(no_collision_data_P1)
     no_collision_data_P2 = np.array(no_collision_data_P2)
     return no_collision_data_P1, no_collision_data_P2
