@@ -122,7 +122,7 @@ def generate_one_collision(N=2800, pert_ratio=0.1):
         rotation_axis1 = rotation_axis1 / np.linalg.norm(rotation_axis1)
         rad1 = np.random.uniform(low=-np.pi, high=np.pi)
         R1 = rotation_matrix(rotation_axis1, rad1)
-        scale1 = np.random.uniform(low=0.5, high=1.5)
+        scale1 = np.random.uniform(low=0.6, high=1.4)
         move_d1 = np.random.normal(size=3)
         move_d1 = move_d1 / np.linalg.norm(move_d1)
         move_s1 = np.random.uniform(low=0., high=10.)
@@ -143,7 +143,7 @@ def generate_one_collision(N=2800, pert_ratio=0.1):
         rotation_axis2 = rotation_axis2 / np.linalg.norm(rotation_axis2)
         rad2 = np.random.uniform(low=-np.pi, high=np.pi)
         R2 = rotation_matrix(rotation_axis2, rad2)
-        scale2 = np.random.uniform(low=0.5, high=1.5)
+        scale2 = np.random.uniform(low=0.6, high=1.4)
         move_d2 = np.random.normal(size=3)
         move_d2 = move_d2 / np.linalg.norm(move_d2) * pert_ratio
         move_d2 = move_d1 + move_d2
