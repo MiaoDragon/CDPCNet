@@ -9,6 +9,7 @@ import klampt
 from klampt import vis as klvis
 import time
 import pandas as pd
+from tqdm import tqdm
 from pyntcloud import PyntCloud
 
 def generate_cube(N, scale, move, rotation):
@@ -226,9 +227,10 @@ def generate_one_collision(N=2800, pert_ratio=0.1):
             return P1, P2
 
 def generate_collision(batch=1000, N=2800, pert_ratio=0.1):
+    print('collision:')
     collision_data_P1 = []
     collision_data_P2 = []
-    for i in range(batch):
+    for i in tqdm(range(batch)):
         #print('collision: %d' % (i))
         P1, P2 = generate_one_collision(N, pert_ratio)
         collision_data_P1.append(P1)
@@ -279,9 +281,10 @@ def generate_one_no_collision(N=2800):
             return P1, P2
 
 def generate_no_collision(batch=1000, N=2800):
+    print('no collision:')
     no_collision_data_P1 = []
     no_collision_data_P2 = []
-    for i in range(batch):
+    for i in tqdm(range(batch)):
         #print('no collision: %d' % (i))
         P1, P2 = generate_one_no_collision(N)
         no_collision_data_P1.append(P1)
