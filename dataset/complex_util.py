@@ -123,19 +123,25 @@ def generate_one_collision(N=2800, pert_ratio=0.1):
         rad1 = np.random.uniform(low=-np.pi, high=np.pi)
         R1 = rotation_matrix(rotation_axis1, rad1)
         scale1 = np.random.uniform(low=0.6, high=1.4)
-        move_d1 = np.random.normal(size=3)
-        move_d1 = move_d1 / np.linalg.norm(move_d1)
-        move_s1 = np.random.uniform(low=0., high=10.)
-        move1 = move_d1 * move_s1
         P1 = geo_pcs[geos[geo_type]]
-        P1 = (scale1 * P1.T @ R1 + move1).T
+        P1 = (scale1 * P1.T @ R1).T
         cloud1 = geo_clouds[geos[geo_type]]
         p1 = np.array([cloud1.points['x'], cloud1.points['y'], cloud1.points['z']])
-        p1 = (scale1 * p1.T @ R1 + move1)
+        p1 = (scale1 * p1.T @ R1)
         p1 = pd.DataFrame(p1)
         p1.columns = ['x', 'y', 'z']
         cloud1.points = p1
         cloud1.mesh = geo_meshs[geos[geo_type]]
+
+        # randomly pick up several points
+        picked_points = np.random.choice(len(P1[0]), 10)
+        picked_points = P1.T[picked_points]
+        # randomly generate ratio for convex combination
+        picked_ratio = np.random.uniform(low=0, high=1, size=len(picked_points))
+        picked_ratio = picked_ratio / np.linalg.norm(picked_ratio)
+        # add Gaussian noise
+        dest_pt = picked_ratio @ picked_points + np.random.normal()
+
 
 
         geo_type = np.random.choice(len(geos))
@@ -144,14 +150,15 @@ def generate_one_collision(N=2800, pert_ratio=0.1):
         rad2 = np.random.uniform(low=-np.pi, high=np.pi)
         R2 = rotation_matrix(rotation_axis2, rad2)
         scale2 = np.random.uniform(low=0.6, high=1.4)
-        move_d2 = np.random.normal(size=3)
-        move_d2 = move_d2 / np.linalg.norm(move_d2) * pert_ratio
-        move_d2 = move_d1 + move_d2
-        move_d2 = move_d2 / np.linalg.norm(move_d2)
-        move_s2 = np.random.uniform(low=move_s1-scale1, high=move_s1+scale1)
-        move2 = move_d2 * move_s2
         P2 = geo_pcs[geos[geo_type]]
-        P2 = (scale2 * P2.T @ R2 + move2).T
+        # randomly pick up one point to go to the dest pt
+        picked_point = np.random.choice(len(P2[0]))
+
+        P2 = (scale2 * P2.T @ R2).T
+        picked_point = P2.T[picked_point]
+        move2 = dest_pt - picked_point
+        P2 += move2
+
         cloud2 = geo_clouds[geos[geo_type]]
         p2 = np.array([cloud2.points['x'], cloud2.points['y'], cloud2.points['z']])
         p2 = (scale2 * p2.T @ R2 + move2)
