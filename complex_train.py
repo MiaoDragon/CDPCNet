@@ -2,8 +2,8 @@
 part of this training pipeline is inspired by:
      https://github.com/fxia22/pointnet.pytorch
 """
-import model.simple_siamesePointnet
-import model.siamesePointNet
+from model import simple_siamesePointnet
+from model import siamesePointNet
 from dataset.complex_loader import create_split_loaders
 from save_util import *
 import argparse
@@ -44,9 +44,9 @@ def main(args):
         print("CUDA NOT supported")
 
     if args.model_type == 'simple':
-        classifier = model.simple_siamesePointnet.SiamesePointNet(feature_transform=args.feature_transform)
+        classifier = simple_siamesePointnet.SiamesePointNet(feature_transform=args.feature_transform)
     elif args.model_type == 'deep':
-        classifier = model.siamesePointnet.SiamesePointNet(feature_transform=args.feature_transform)
+        classifier = siamesePointnet.SiamesePointNet(feature_transform=args.feature_transform)
     if os.path.exists(start_model):
         load_net_state(classifier, start_model)
     # setup for training
