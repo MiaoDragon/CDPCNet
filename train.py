@@ -12,6 +12,7 @@ import torch
 import os
 import torch.optim as optim
 import torch.nn as nn
+import sys
 from tqdm import tqdm
 def main(args):
     purple = lambda x: '\033[45m' + x + '\033[0m'
@@ -85,7 +86,7 @@ def main(args):
             print('[%d: %d/%d] train loss: %f accuracy: %f' % (epoch, i, num_batch, loss.item(), acc))
             train_loss.append(loss.item())
             train_acc.append(acc)
-
+            sys.stdout.flush()
             if i % args.val_batch == 0:
                 # validation
                 j, data = next(enumerate(valloader, 1))
@@ -103,6 +104,7 @@ def main(args):
                 print('[%d: %d/%d] %s loss: %f accuracy: %f' % (epoch, i, num_batch, purple('validation'), loss, acc))
                 val_loss.append(loss)
                 val_acc.append(acc)
+                sys.stdout.flush()
         # evaluate after each epoch
         classifier = classifier.eval()
         test_loss_i = 0.
@@ -122,6 +124,7 @@ def main(args):
         test_loss_i = test_loss_i * args.batch_size / len(testloader)
         test_acc_i = test_correct / len(testloader)
         print('[epoch %d] %s loss: %f accuracy: %f' % (epoch, blue('test'), loss, test_acc_i))
+        sys.stdout.flush()
         test_loss.append(test_loss_i)
         test_acc.append(test_acc_i)
         if epoch % args.save_epoch == 0:
@@ -146,7 +149,7 @@ def main(args):
         total_testset += points.size()[0]
 
     print("final accuracy {}".format(total_correct / float(total_testset)))
-
+    sys.stdout.flush()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_size', type=int, required=True, help="dataset size")
