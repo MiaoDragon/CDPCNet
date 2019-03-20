@@ -59,7 +59,7 @@ class SiamesePointNet(nn.Module):
         div_pos = len(x) // 2
         x = torch.abs(x[:div_pos] - x[div_pos:])
         x = self.fc4(x)  # used for classification (either similar or not)
-        return x
+        return x, trans, trans_feat
     def separate(self, x):
         # x shape: [B*2, shape]
         batchsize = x.size()[0]
