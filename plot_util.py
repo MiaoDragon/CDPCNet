@@ -29,7 +29,7 @@ def running_mean(x, N):
 # identifier for the output figure PNG; if not provided, it will default to
 # using the current datetime.
 def plot(loss, acc, name=None):
-    fig = plt.figure(figsize=(8,4), dpi=80)
+    fig = plt.figure(figsize=(12,6), dpi=80)
     ax = fig.add_subplot(211)
     title = name + ' loss'
 
@@ -44,9 +44,9 @@ def plot(loss, acc, name=None):
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    x,y = _convert_to_xy(epi_reward)
+    x,y = _convert_to_xy(loss)
 
-    plt.plot(x,y,label='episode reward')
+    plt.plot(x,y,label=name+'loss')
     n = max(x)
 
     ax = fig.add_subplot(212)
@@ -61,8 +61,8 @@ def plot(loss, acc, name=None):
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    x,y = _convert_to_xy(train_loss)
-    plt.plot(x,y,label='training loss')
+    x,y = _convert_to_xy(acc)
+    plt.plot(x,y,label=name+'acc')
     n = max(max(x),n)
 
     ticks = (np.arange(nbins) + 1) * n//nbins

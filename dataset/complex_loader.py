@@ -24,6 +24,8 @@ class ComplexDataset(Dataset):
     def __getitem__(self, ind):
         batch_idx = ind // self.minibatch
         mini_idx = ind % self.minibatch  # index inside each minibatch
+        P1 = np.load(self.path+self.name+'1_%d.npy' % (batch_idx))
+        print(P1.shape)
         P1 = np.load(self.path+self.name+'1_%d.npy' % (batch_idx))[mini_idx]
         P2 = np.load(self.path+self.name+'2_%d.npy' % (batch_idx))[mini_idx]
         P1 = torch.from_numpy(P1).type(torch.FloatTensor)
