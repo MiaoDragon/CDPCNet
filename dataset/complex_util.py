@@ -18,7 +18,7 @@ geo_pcs = {}
 geo_meshs = {}
 for geo in geos:
     # use compressed version for collision detection
-    cloud = PyntCloud.from_file('complex/'+geo+'_compressed.ply')
+    cloud = PyntCloud.from_file('/media/arclabdl1/HD1/YLmiao/CDPCNet/complex/'+geo+'_compressed.ply')
     geo_clouds[geo] = cloud
     geo_meshs[geo] = cloud.mesh
     mean_x = cloud.points['x'].mean()
