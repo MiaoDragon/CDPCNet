@@ -5,7 +5,7 @@ including functions for generating collision and no-collision data
 import math
 import numpy as np
 import klampt
-import open3d
+#import open3d
 from klampt import vis as klvis
 import time
 import pandas as pd
@@ -49,7 +49,7 @@ for geo in geos:
     geo_pcs[geo][2,:] -= mean_z
     geo_pcs[geo] = geo_pcs[geo]
 
-
+"""
 def visualize(pcs):
     # visualize point cloud list
     pcd_list = []
@@ -65,7 +65,7 @@ def visualize(pcs):
         vis.add_geometry(pcd)
     vis.run()
     vis.destroy_window()
-
+"""
 
 def make_mesh(pc):
     # given PyntCloud
@@ -270,7 +270,7 @@ def generate_no_collision(batch=1000, N=2800):
     no_collision_data_P2 = np.array(no_collision_data_P2)
     return no_collision_data_P1, no_collision_data_P2
 
-
+"""
 def test():
     P1, P2 = generate_one_no_collision()
     visualize([P1, P2])
@@ -292,6 +292,6 @@ def test():
     #klvis.add('geo1',geo1)
     #klvis.add('geo2',geo2)
     klvis.loop(setup=setup,callback=callback,cleanup=cleanup)
-
+"""
 if __name__=='__main__':
     test()
