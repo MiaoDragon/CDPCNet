@@ -266,6 +266,8 @@ def generate_no_collision(batch=1000, N=2800):
     for i in tqdm(range(batch)):
         #print('no collision: %d' % (i))
         P1, P2 = generate_one_no_collision(N)
+        no_collision_data_P1.append(P1)
+        no_collision_data_P2.append(P2)
     no_collision_data_P1 = np.array(no_collision_data_P1)
     no_collision_data_P2 = np.array(no_collision_data_P2)
     return no_collision_data_P1, no_collision_data_P2
