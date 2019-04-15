@@ -48,6 +48,7 @@ def main(args):
     elif args.model_type == 'deep':
         classifier = SiamesePointNet(feature_transform=args.feature_transform)
     if os.path.exists(start_model):
+        print('loading...')
         load_net_state(classifier, start_model)
     # setup for training
     optimizer = optim.Adam(classifier.parameters(), lr=0.001, betas=(0.9, 0.999))
@@ -67,7 +68,7 @@ def main(args):
     test_acc = []
     if os.path.exists(start_model):
         train_loss, train_acc, val_loss, val_acc, test_loss, test_acc = load_eval(start_model)
-
+    print(train_acc[-1])
 
     total_correct = 0
     total_testset = 0
